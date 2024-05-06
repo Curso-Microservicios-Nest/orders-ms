@@ -1,4 +1,8 @@
-import { Controller, NotImplementedException } from '@nestjs/common';
+import {
+  Controller,
+  NotImplementedException,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { OrdersService } from './orders.service';
@@ -8,8 +12,8 @@ export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
   @MessagePattern('create')
-  create(@Payload() createOrderDto: CreateOrderDto) {
-    return this.ordersService.create(createOrderDto);
+  create(@Payload() createOrder: CreateOrderDto) {
+    return this.ordersService.create(createOrder);
   }
 
   @MessagePattern('findAll')
@@ -18,7 +22,7 @@ export class OrdersController {
   }
 
   @MessagePattern('findOne')
-  findOne(@Payload() id: number) {
+  findOne(@Payload('id', ParseIntPipe) id: number) {
     return this.ordersService.findOne(id);
   }
 
