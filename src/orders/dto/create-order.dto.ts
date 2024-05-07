@@ -20,7 +20,7 @@ export class CreateOrderDto {
   readonly totalItems: number;
 
   @IsEnum(OrderStatus, {
-    message: `Status must be one of the following: ${OrderStatus}`,
+    message: `Status must be a valid enum value: ${Object.values(OrderStatus).join(', ')}`,
   })
   @IsOptional()
   readonly status: OrderStatus = OrderStatus.PENDING;

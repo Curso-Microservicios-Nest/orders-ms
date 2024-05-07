@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { FilterOrdersDto } from './dto/filter-orders.dto';
 import { OrdersService } from './orders.service';
 
 @Controller()
@@ -17,8 +18,8 @@ export class OrdersController {
   }
 
   @MessagePattern('findAll')
-  findAll() {
-    return this.ordersService.findAll();
+  findAll(@Payload() filters: FilterOrdersDto) {
+    return this.ordersService.findAll(filters);
   }
 
   @MessagePattern('findOne')
