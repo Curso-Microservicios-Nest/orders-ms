@@ -1,9 +1,6 @@
-import {
-  Controller,
-  NotImplementedException,
-  ParseUUIDPipe,
-} from '@nestjs/common';
+import { Controller, ParseUUIDPipe } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
+import { ChangeOrderStatusDto } from './dto/change-order-status.dto';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { FilterOrdersDto } from './dto/filter-orders.dto';
 import { OrdersService } from './orders.service';
@@ -28,7 +25,7 @@ export class OrdersController {
   }
 
   @MessagePattern('changeStatus')
-  changeStatus() {
-    throw new NotImplementedException('Method not implemented.');
+  changeStatus(@Payload() changeOrderStatus: ChangeOrderStatusDto) {
+    return this.ordersService.changeStatus(changeOrderStatus);
   }
 }
