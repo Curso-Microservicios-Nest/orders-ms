@@ -24,11 +24,24 @@ model Order {
   id          String      @id @default(uuid())
   totalAmount Float       @map("total_amount")
   totalItems  Int         @map("total_items")
-  status      OrderStatus
+  status      OrderStatus @default(PENDING)
   paid        Boolean     @default(false)
   paidAt      DateTime?   @map("paid_at")
   createdAt   DateTime    @default(now()) @map("created_at")
   updatedAt   DateTime    @updatedAt @map("updated_at")
 
+  OrderItem OrderItem[]
+
   @@map("orders")
+}
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  productId Int     @map("product_id")
+  quantity  Int
+  price     Float
+  Order     Order?  @relation(fields: [orderId], references: [id])
+  orderId   String? @map("order_id")
+
+  @@map("orders_items")
 }
