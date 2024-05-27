@@ -43,5 +43,5 @@ model OrderItem {
   Order     Order?  @relation(fields: [orderId], references: [id])
   orderId   String? @map("order_id")
 
-  @@map("orders_items")
+  @@map("orders_has_items")
 }
