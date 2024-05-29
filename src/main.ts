@@ -11,12 +11,12 @@ async function bootstrap() {
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
     AppModule,
     {
-      transport: Transport.TCP,
-      options: {
-        port: envs.port,
-      },
+      transport: Transport.NATS,
+      options: { servers: envs.natsServers },
     },
   );
+
+  logger.log(envs.natsServers);
 
   app.useGlobalPipes(
     new ValidationPipe({
