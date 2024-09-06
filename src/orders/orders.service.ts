@@ -12,6 +12,8 @@ import { Services } from 'src/config/services.enum';
 import { ChangeOrderStatusDto } from './dto/change-order-status.dto';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { FilterOrdersDto } from './dto/filter-orders.dto';
+import { OrderWithProducts } from './interfaces/order-with-products.interface';
+import { OrderPayment } from './interfaces/order-payment.interface';
 
 @Injectable()
 export class OrdersService extends PrismaClient implements OnModuleInit {
@@ -112,7 +114,7 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
     if (!order) {
       throw new RpcException({
         statusCode: HttpStatus.NOT_FOUND,
-        message: `Order not found`,
+        message: 'Order not found',
       });
     }
     const productIds = order.OrderItem.map((item) => item.productId);
@@ -138,5 +140,26 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
       where: { id },
       data: { status },
     });
+  }
+
+  async createPaymentOrder(order: OrderWithProducts) {
+    const newOrder: OrderPayment = {
+      orderId: order.id,
+      currency: 'USD',
+      items: order.OrderItem.map((item) => ({
+        name: item.product,
+        quantity: item.quantity,
+        price: item.price,
+      })),
+    };
+    try {
+      return await firstValueFrom(this.client.send('create.order', newOrder));
+    } catch (error) {
+      this.logger.error(error);
+      throw new RpcException({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Couldn't create payment order",
+      });
+    }
   }
 }
