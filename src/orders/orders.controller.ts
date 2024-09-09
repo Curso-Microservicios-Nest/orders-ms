@@ -1,8 +1,7 @@
 import { Controller, ParseUUIDPipe } from '@nestjs/common';
-import { MessagePattern, Payload } from '@nestjs/microservices';
-import { ChangeOrderStatusDto } from './dto/change-order-status.dto';
-import { CreateOrderDto } from './dto/create-order.dto';
-import { FilterOrdersDto } from './dto/filter-orders.dto';
+import { EventPattern, MessagePattern, Payload } from '@nestjs/microservices';
+
+import { ChangeOrderStatusDto, CreateOrderDto, FilterOrdersDto } from './dto';
 import { OrdersService } from './orders.service';
 
 @Controller()
@@ -29,5 +28,15 @@ export class OrdersController {
   @MessagePattern('changeStatus')
   changeStatus(@Payload() changeOrderStatus: ChangeOrderStatusDto) {
     return this.ordersService.changeStatus(changeOrderStatus);
+  }
+
+  /**
+   * Evento ejecutado desde payments-ms al completar un pago. Se ejecuta cuando se
+   * recibe un evento 'payment.created'.
+   * @param paidOrderDto
+   */
+  @EventPattern('payment.created')
+  paidOrder(@Payload() paidOrderDto: any) {
+    console.log('Order paid:', paidOrderDto);
   }
 }

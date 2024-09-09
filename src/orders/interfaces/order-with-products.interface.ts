@@ -12,7 +12,6 @@ export interface OrderWithProducts {
   totalItems: number;
   status: OrderStatus;
   paid: boolean;
-  paidAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
