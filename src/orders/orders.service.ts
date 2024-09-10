@@ -9,11 +9,12 @@ import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { PrismaClient } from '@prisma/client';
 import { firstValueFrom } from 'rxjs';
 import { Services } from 'src/config/services.enum';
+import { PaidOrderDto } from './dto';
 import { ChangeOrderStatusDto } from './dto/change-order-status.dto';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { FilterOrdersDto } from './dto/filter-orders.dto';
-import { OrderWithProducts } from './interfaces/order-with-products.interface';
 import { OrderPayment } from './interfaces/order-payment.interface';
+import { OrderWithProducts } from './interfaces/order-with-products.interface';
 
 @Injectable()
 export class OrdersService extends PrismaClient implements OnModuleInit {
@@ -109,6 +110,9 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
         OrderItem: {
           select: { productId: true, price: true, quantity: true },
         },
+        PaidOrder: {
+          select: { paymentId: true, totalPaid: true, currency: true },
+        },
       },
     });
     if (!order) {
@@ -161,5 +165,20 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
         message: "Couldn't create payment order",
       });
     }
+  }
+
+  async processPaidOrder(paidOrder: PaidOrderDto) {
+    const { orderId, paymentId, totalPaid, currency } = paidOrder;
+    await this.order.update({
+      where: { id: orderId },
+      data: {
+        status: 'PAID',
+        paid: true,
+        PaidOrder: {
+          create: { paymentId, totalPaid, currency },
+        },
+      },
+    });
+    this.logger.log('Order updated to PAID');
   }
 }
