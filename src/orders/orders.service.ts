@@ -8,13 +8,15 @@ import {
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { PrismaClient } from '@prisma/client';
 import { firstValueFrom } from 'rxjs';
+
 import { Services } from 'src/config/services.enum';
-import { PaidOrderDto } from './dto';
-import { ChangeOrderStatusDto } from './dto/change-order-status.dto';
-import { CreateOrderDto } from './dto/create-order.dto';
-import { FilterOrdersDto } from './dto/filter-orders.dto';
-import { OrderPayment } from './interfaces/order-payment.interface';
-import { OrderWithProducts } from './interfaces/order-with-products.interface';
+import {
+  ChangeOrderStatusDto,
+  CreateOrderDto,
+  FilterOrdersDto,
+  PaidOrderDto,
+} from './dto';
+import { OrderPayment, OrderWithProducts, PaymentCreated } from './interfaces';
 
 @Injectable()
 export class OrdersService extends PrismaClient implements OnModuleInit {
@@ -146,7 +148,7 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
     });
   }
 
-  async createPaymentOrder(order: OrderWithProducts) {
+  async createPaymentOrder(order: OrderWithProducts): Promise<PaymentCreated> {
     const newOrder: OrderPayment = {
       orderId: order.id,
       currency: 'USD',
@@ -156,15 +158,17 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
         price: item.price,
       })),
     };
+    const response: PaymentCreated = { url: null };
     try {
-      return await firstValueFrom(this.client.send('create.order', newOrder));
+      const { url } = await firstValueFrom(
+        this.client.send('create.order', newOrder),
+      );
+      response.url = url;
     } catch (error) {
       this.logger.error(error);
-      throw new RpcException({
-        statusCode: HttpStatus.BAD_REQUEST,
-        message: "Couldn't create payment order",
-      });
+      response.message = error.message;
     }
+    return response;
   }
 
   async processPaidOrder(paidOrder: PaidOrderDto) {
