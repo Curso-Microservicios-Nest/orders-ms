@@ -9,7 +9,7 @@ import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { PrismaClient } from '@prisma/client';
 import { firstValueFrom } from 'rxjs';
 
-import { Services } from 'src/config/services.enum';
+import { Services } from 'src/enums';
 import {
   ChangeOrderStatusDto,
   CreateOrderDto,
