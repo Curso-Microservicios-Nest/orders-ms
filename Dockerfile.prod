@@ -1,0 +1,50 @@
+# 1. Dependencias
+FROM node:20.14.0-alpine3.20 AS deps
+
+WORKDIR /usr/src/app
+
+COPY package*.json ./
+
+RUN npm install
+
+# 2. Compilar el proyecto
+FROM node:20.14.0-alpine3.20 AS build
+
+WORKDIR /usr/src/app
+
+COPY --from=deps /usr/src/app/node_modules ./node_modules
+COPY . .
+
+# Se copia la variable de entorno DATABASE_URL para que Prisma pueda interactuar
+ARG DATABASE_URL
+
+# Se define la variable de entorno DATABASE_URL. Esta variable es necesaria para
+# que Prisma pueda ejecutar las migraciones de la base de datos, ya que necesita
+# saber la URL de la base de datos a la que se conectará.
+ENV DATABASE_URL=$DATABASE_URL
+
+# Ejecuta las migraciones pendientes de la base de datos con Prisma
+RUN npx prisma migrate deploy
+
+# Genera el cliente de Prisma basado en el esquema definido en schema.prisma
+RUN npx prisma generate
+
+RUN npm run build
+RUN npm prune --omit=dev && npm cache clean --force
+
+# 3. Crear la imagen de Docker
+FROM node:20.14.0-alpine3.20 AS prod
+
+WORKDIR /usr/src/app
+
+COPY --from=build /usr/src/app/node_modules ./node_modules
+COPY --from=build /usr/src/app/dist ./dist
+COPY --from=build /usr/src/app/prisma ./prisma
+
+ENV PORT=3000
+
+USER node
+
+EXPOSE 3000
+
+CMD ["node", "dist/main.js"]
