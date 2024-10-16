@@ -35,14 +35,6 @@ npx prisma migrate dev
 npx prisma migrate dev --name MigrationName
 ```
 
-## 🐳 Docker
-
-Levantar la base de datos para las ordenes
-
-```sh
-docker-compose up -d
-```
-
 ## Test
 
 ```bash
@@ -56,16 +48,19 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
-## Support
+## 🐳 Docker
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```sh
+# Levantar la base de datos para las ordenes
+docker-compose up -d
+```
 
-## Stay in touch
+```sh
+# Crear el contenedor de NATS
+docker run -d --name nats-main -p 4222:4222 -p 6222:6222 -p 8222:8222 nats
+```
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
+```sh
+# Crear la imagen de producción
+docker build -f Dockerfile.prod -t orders-ms .
+```
